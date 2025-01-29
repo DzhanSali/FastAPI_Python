@@ -1,14 +1,12 @@
 from datetime import datetime
-
 from fastapi import HTTPException
-from sqlalchemy import select, and_
-from DTOs.dtos import CarResponse, CarRequest, MaintenanceResponse, MaintenanceRequest
-from models import Car, Maintenance
+from sqlalchemy import select, and_, func
+from DTOs.dtos import MaintenanceResponse, MaintenanceRequest, MonthlyRequestReport
+from models import Maintenance
 from db import Session, engine
 from sqlalchemy.orm import Session as ORMSession
-
 from services.car_service import get_car_name
-from services.garage_service import get_garage, get_garage_name
+from services.garage_service import get_garage_name
 
 
 def get_maintenance_by_id(id_: int, session: ORMSession):
@@ -84,6 +82,45 @@ def delete_maintenance(maintenance_id: int) -> MaintenanceResponse:
         s.delete(maint)
         return map_maintenance_to_response(maint)
 
+def get_monthly_report(garageId: int, startMonth: str, endMonth: str) -> list[MonthlyRequestReport]:
+    with Session() as s:
+        maintenances = (
+            s.query(Maintenance)
+            .filter(Maintenance.garage_id == garageId)
+            .filter(func.substr(Maintenance.scheduled_date, 1, 7) >= startMonth)
+            .filter(func.substr(Maintenance.scheduled_date, 1, 7) <= endMonth)
+            .all()
+        )
+        monthly_requests = {}
+
+        for maintenance in maintenances:
+            date = maintenance.scheduled_date[:7]
+            if date not in monthly_requests:
+                monthly_requests[date] = 0
+            monthly_requests[date] += 1
+
+        start_year = int(startMonth[:4])
+        end_year = int(endMonth[:4])
+        months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+
+        for year in range(start_year, end_year + 1):
+            for month in months:
+                smt = f"{year}-{month}"
+                if endMonth >= smt >= startMonth:
+                    if smt not in monthly_requests:
+                        monthly_requests[smt] = 0
+
+        sorted_requests = {k: monthly_requests[k] for k in sorted(monthly_requests.keys())}
+
+        report = [
+            MonthlyRequestReport(
+                yearMonth=date,
+                requests=requests
+            )
+            for date, requests in sorted_requests.items()
+        ]
+        return report
+
 
 def map_maintenance_to_response(maintenance: Maintenance) -> MaintenanceResponse:
     return MaintenanceResponse(
@@ -94,7 +131,6 @@ def map_maintenance_to_response(maintenance: Maintenance) -> MaintenanceResponse
         scheduledDate=maintenance.scheduled_date,
         garageId=maintenance.garage_id,
         garageName=maintenance.garage_name
-        #garages=[get_garage(maintenance.garage_id)]
     )
 
 def map_request_to_maintenance(request: MaintenanceRequest) -> Maintenance:

@@ -1,6 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import List
-
 
 class GarageRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=20, description="Garage name must be between 2 and 20 characters.")
@@ -50,3 +48,7 @@ class GarageDARepostResponse(BaseModel):
     date: str
     requests: int
     availableCapacity: int
+
+class MonthlyRequestReport(BaseModel):
+    yearMonth: str
+    requests: int

@@ -1,7 +1,5 @@
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.sql.functions import concat
-
 from DTOs.dtos import CarResponse, CarRequest
 from models import Car
 from db import Session, engine

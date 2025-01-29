@@ -1,9 +1,7 @@
 from fastapi import HTTPException
-from sqlalchemy import and_
-
 from DTOs.dtos import GarageResponse, GarageRequest, GarageDARepostResponse
 from models import Garage, Maintenance
-from db import Session, engine
+from db import Session
 from sqlalchemy.orm import Session as ORMSession
 
 def get_garage_by_id(id_: int, session: ORMSession):

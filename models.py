@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import DeclarativeBase
 
-#Comments with explanation at the bottom
 
 class Base(DeclarativeBase):
     pass
@@ -32,14 +31,3 @@ class Maintenance(Base):
     scheduled_date = Column(String, nullable=False)
     garage_id = Column(Integer, ForeignKey("garages.id"), nullable=False)
     garage_name = Column(String, nullable=False)
-    #car = relationship("Car", back_populates="maintenances")
-    #garage = relationship("Garage", back_populates="maintenances")
-
-""""" 
-
-    # Car to Garage: One-to-Many
-Implemented by:
-placing "garages = relationship("Garage", cascade="all, delete-orphan")" in Car(Base)
-and placing "car_id = Column(Integer, ForeignKey("cars.id"))" in Garage(Base)
-
-"""""

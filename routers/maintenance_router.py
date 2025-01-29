@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from DTOs.dtos import MaintenanceResponse, MaintenanceRequest
+from DTOs.dtos import MaintenanceResponse, MaintenanceRequest, MonthlyRequestReport
 from services.maintenance_service import get_maintenances, get_maintenance_by_filter, create_maintenance, \
-    update_maintenance, delete_maintenance
+    update_maintenance, delete_maintenance, get_monthly_report
 
 maintenance_router = APIRouter()
 
@@ -11,6 +11,10 @@ def get_maintenance(carId: int | None=None, garageId: int | None = None, startDa
         return get_maintenances()
     else:
         return get_maintenance_by_filter(carId, garageId, startDate, endDate)
+
+@maintenance_router.get("/maintenance/monthlyRequestsReport", response_model=list[MonthlyRequestReport], status_code=200)
+def get_report(garageId: int, startMonth: str, endMonth: str):
+    return get_monthly_report(garageId, startMonth, endMonth)
 
 @maintenance_router.get("/maintenance/{maintenance_id}", response_model=MaintenanceResponse, status_code=200)
 def get_single_maintenance(maintenance_id:int):
