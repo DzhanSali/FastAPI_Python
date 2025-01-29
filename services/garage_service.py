@@ -1,6 +1,8 @@
 from fastapi import HTTPException
+from sqlalchemy import and_
+
 from DTOs.dtos import GarageResponse, GarageRequest, GarageDARepostResponse
-from models import Garage
+from models import Garage, Maintenance
 from db import Session, engine
 from sqlalchemy.orm import Session as ORMSession
 
@@ -59,7 +61,34 @@ def delete_garage(id_:int) -> GarageResponse:
         return map_garage_to_response(garage)
 
 def get_garage_report(garageId: int, startDate: str, endDate: str) -> list[GarageDARepostResponse]:
-    pass
+    with Session() as s:
+        garage = get_garage_by_id(garageId, s)
+
+        garage_in_maintenances = (
+            s.query(Maintenance)
+            .filter(Maintenance.garage_id == garageId)
+            .filter(Maintenance.scheduled_date >= startDate)
+            .filter(Maintenance.scheduled_date <= endDate)
+            .all()
+        )
+        daily_requests = {}
+
+        for maintenance in garage_in_maintenances:
+            date = maintenance.scheduled_date
+            if date not in daily_requests:
+                daily_requests[date] = 0
+            daily_requests[date] += 1
+
+        report = [
+            GarageDARepostResponse(
+                date=date,
+                requests=requests,
+                availableCapacity=garage.capacity - requests
+            )
+            for date, requests in daily_requests.items()
+        ]
+        return report
+
 
 def map_garage_to_response(garage: Garage) -> GarageResponse:
     return GarageResponse(
@@ -77,3 +106,8 @@ def map_request_to_garage(request: GarageRequest) -> Garage:
         city = request.city,
         capacity = request.capacity
     )
+
+def get_garage_name(garage_id: int) -> str:
+    with Session() as s:
+        garage = get_garage_by_id(garage_id, s)
+        return garage.name

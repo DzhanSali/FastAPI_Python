@@ -10,6 +10,10 @@ garage_router = APIRouter()
 def get_all_garages(city: str | None = None) -> list[GarageResponse]:
     return get_garages(city)
 
+@garage_router.get("/garages/dailyAvailabilityReport", response_model=list[GarageDARepostResponse], status_code=200)
+def get_report(garageId: int, startDate: str, endDate: str) -> list[GarageDARepostResponse]:
+    return get_garage_report(garageId, startDate, endDate)
+
 @garage_router.get("/garages/{garage_id}", response_model=GarageResponse, status_code=200)
 def get_single_garage(garage_id:int):
     return get_garage(garage_id)
@@ -25,7 +29,3 @@ def update_a_garage(garage_id: int, request: GarageRequest):
 @garage_router.delete("/garages/{garage_id}", response_model=GarageResponse, status_code=200)
 def delete_a_garage(garage_id: int):
     return delete_garage(garage_id)
-
-@garage_router.get("/garages/dailyAvailabilityReport", response_model=list[GarageDARepostResponse], status_code=200)
-def get_report(garageId: int, startDate: str, endDate: str) -> list[GarageDARepostResponse]:
-    return get_garage_report(garageId, startDate, endDate)

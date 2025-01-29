@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.sql.functions import concat
 
 from DTOs.dtos import CarResponse, CarRequest
 from models import Car
@@ -100,3 +101,8 @@ def map_car_to_response(car: Car) -> CarResponse:
         licensePlate = car.license_plate,
         garages = [get_garage(car.garage_id)]
     )
+
+def get_car_name(car_id: int) -> str:
+    with Session() as s:
+        car = get_car_by_id(car_id, s)
+        return car.make + " " + car.model

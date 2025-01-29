@@ -21,10 +21,8 @@ class Car(Base):
     model = Column(String, nullable=False)
     production_year = Column(Integer, nullable=False)
     license_plate = Column(String, unique=True, nullable=False)
-    #garages = relationship("Garage", cascade="all, delete-orphan")
     garage_id = Column(Integer, ForeignKey("garages.id"), nullable=False)
 
-""""" 
 class Maintenance(Base):
     __tablename__ = "maintenances"
     id = Column(Integer, primary_key=True)
@@ -34,9 +32,8 @@ class Maintenance(Base):
     scheduled_date = Column(String, nullable=False)
     garage_id = Column(Integer, ForeignKey("garages.id"), nullable=False)
     garage_name = Column(String, nullable=False)
-    car = relationship("Car", back_populates="maintenances")
-    garage = relationship("Garage", back_populates="maintenances")
-"""""
+    #car = relationship("Car", back_populates="maintenances")
+    #garage = relationship("Garage", back_populates="maintenances")
 
 """"" 
 
